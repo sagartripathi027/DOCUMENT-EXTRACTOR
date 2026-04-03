@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# Environment (NEVER commit this — contains API keys!)
+.env
+.env.local
+
+# Data files (don't commit uploaded docs or outputs)
+data/uploads/*
+data/outputs/*
+data/vector_store/*
+data/test_*
+
+# Keep empty folders tracked
+!data/uploads/.gitkeep
+!data/outputs/.gitkeep
+!data/vector_store/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Test cache
+.pytest_cache/
+.coverage
