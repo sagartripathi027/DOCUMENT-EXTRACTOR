@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # --- CONFIGURATION ---
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}  # ❌ removed pdf
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -40,7 +40,7 @@ def handle_extraction():
         return jsonify({"error": "No file selected"}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({"error": f"Only {ALLOWED_EXTENSIONS} allowed"}), 400
+        return jsonify({"error": "Only PNG, JPG, JPEG, and PDF files are allowed"}), 400
 
     filepath = None  # safety
 

@@ -18,7 +18,10 @@ OCR-based system to extract structured text from images and PDFs.
 - Achieved ~90% accuracy on 80+ test documents
 
 ## 📸 Demo
-(Add screenshot or GIF here)
+
+<p align="center">
+  <img src="image/demo.png" width="700">
+</p>
 
 ## ⚙️ How to Run
 ```bash
