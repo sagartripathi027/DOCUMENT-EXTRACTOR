@@ -8,7 +8,7 @@ from parser import parse_structured_data
 # Initialize Flask app
 app = Flask(__name__)
 
-# --- CONFIGURATION ---
+# CONFIGURATION
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
