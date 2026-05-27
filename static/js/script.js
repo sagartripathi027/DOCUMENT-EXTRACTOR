@@ -94,14 +94,14 @@ function fillResult(data) {
     resultBox.classList.add('show');
 }
 
-// ── File input via click ──────────────────────────────
+// File input via click
 fileInput.addEventListener('change', () => {
     if (fileInput.files[0]) showFile(fileInput.files[0]);
 });
 
 fileRemove.addEventListener('click', clearFile);
 
-// ── Drag & drop ───────────────────────────────────────
+// Drag & drop
 dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
 dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', e => {
@@ -116,7 +116,7 @@ dropZone.addEventListener('drop', e => {
     }
 });
 
-// ── Form submit (single listener) ────────────────────
+// Form submit (single listener)
 document.getElementById('uploadForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
