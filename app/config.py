@@ -1,6 +1,4 @@
-# ============================================================
 #  config.py — App settings loaded from .env file
-# ============================================================
 
 import os
 from dotenv import load_dotenv
