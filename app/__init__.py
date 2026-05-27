@@ -1,11 +1,3 @@
-# ============================================================
-#  app/__init__.py — Flask App Factory
-#
-#  Why use a factory?
-#  Instead of creating app globally, we use a function.
-#  This makes it easy to test and switch configurations.
-# ============================================================
-
 import os
 from flask import Flask
 from app.config import Config
