@@ -12,7 +12,7 @@ def parse_structured_data(text):
     clean = text.lower()
     clean = re.sub(r'[^a-z0-9@.$:/\- ]', ' ', clean)
 
-    # ------------------ DATE ------------------
+    # DATE
     # Matches:
     # 2023-12-01, 12/15/2023, 20231201
     date_patterns = [
@@ -25,11 +25,11 @@ def parse_structured_data(text):
         matches = re.findall(pattern, clean)
         data["dates"].extend(matches)
 
-    # ------------------ AMOUNT ------------------
+    # AMOUNT
     amount_pattern = r'\d{3,}(?:[.,]\d{2})'
     data["amounts"] = re.findall(amount_pattern, clean)
 
-    # ------------------ EMAIL ------------------
+    # EMAIL
     # flexible email detection
     email_pattern = r'[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}'
     match = re.search(email_pattern, clean)
