@@ -2,45 +2,73 @@ import cv2
 import numpy as np
 import pytesseract
 import re
+import os
+
 from pdf2image import convert_from_path
 from PIL import Image
 
-# ✅ Set Tesseract path (Windows)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\SAGAR TRIPATHI\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+if os.name == "nt":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# ✅ Set Poppler path (update this to your actual path)
-# Replace with YOUR actual path where pdftoppm.exe lives
-POPPLER_PATH = r'C:\poppler-24.08.0\Library\bin'
+POPPLER_PATH = r'C:\poppler\poppler-26.02.0\Library\bin'
 
 
 def preprocess_image(image_path):
-    """
-    Preprocess image for better OCR accuracy
-    """
     img = cv2.imread(image_path)
 
     if img is None:
-        raise ValueError("Image not loaded properly. Check file path or format.")
+        raise ValueError("Image not loaded properly.")
 
-    img = cv2.resize(img, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
+    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.convertScaleAbs(gray, alpha=1.3, beta=0)
-    gray = cv2.medianBlur(gray, 3)
-    processed = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    #  Contrast boost (IMPORTANT)
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+    gray = clahe.apply(gray)
+
+    #  Adaptive threshold (fix for light background)
+    processed = cv2.adaptiveThreshold(
+        gray, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11, 2
+    )
+
+    #  Invert (handles light text)
+    processed = cv2.bitwise_not(processed)
 
     return processed
 
 
 def preprocess_pil_image(pil_img):
-    """
-    Same preprocessing but accepts a PIL image (used for PDF pages)
-    """
     img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
     img = cv2.resize(img, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.convertScaleAbs(gray, alpha=1.3, beta=0)
+
+    # 🔥 Auto invert
+    if np.mean(gray) < 127:
+        gray = cv2.bitwise_not(gray)
+
+    # CLAHE
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
+    gray = clahe.apply(gray)
+
+    # Blur
     gray = cv2.medianBlur(gray, 3)
-    processed = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    # Threshold
+    processed = cv2.adaptiveThreshold(
+        gray, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11, 2
+    )
+
+    # Dilation
+    kernel = np.ones((1,1), np.uint8)
+    processed = cv2.dilate(processed, kernel, iterations=1)
 
     return processed
 
@@ -60,11 +88,14 @@ def extract_text(file_path):
     """
     Full OCR pipeline — handles both images and PDFs
     """
-    config = r'--oem 3 --psm 11'
+    config = r'--oem 3 --psm 6'
 
     if file_path.lower().endswith('.pdf'):
         # Convert each PDF page to image, then OCR
-        pages = convert_from_path(file_path, poppler_path=POPPLER_PATH)
+        if os.name == "nt":
+            pages = convert_from_path(file_path, poppler_path=POPPLER_PATH)
+        else:
+            pages = convert_from_path(file_path)
         all_text = ''
         for page in pages:
             processed = preprocess_pil_image(page)
