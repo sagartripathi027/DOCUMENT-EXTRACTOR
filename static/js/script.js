@@ -69,27 +69,40 @@ function setProgress(pct, label) {
     progressPct.textContent  = pct + '%';
 }
 
+function set(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (value && String(value).trim() !== '') {
+        el.textContent = value;
+        el.classList.remove('none');
+    } else {
+        el.textContent = 'Not Found';
+        el.classList.add('none');
+    }
+}
+
 function fillResult(data) {
-    const d = data.data;
+    const d = data.data || {};
+    const f = data.fields || {};
 
     const dates   = Array.isArray(d.dates)   ? d.dates.join(', ')   : (d.dates || '');
     const amounts = Array.isArray(d.amounts) ? d.amounts.join(', ') : (d.amounts || '');
-
-    function set(id, value) {
-        const el = document.getElementById(id);
-        if (value && value.trim() !== '') {
-            el.textContent = value;
-            el.classList.remove('none');
-        } else {
-            el.textContent = 'None found';
-            el.classList.add('none');
-        }
-    }
+    const github     = Array.isArray(f.github)     ? f.github.join(', ')     : (f.github || '');
+    const linkedin   = Array.isArray(f.linkedin)   ? f.linkedin.join(', ')   : (f.linkedin || '');
+    const portfolio  = Array.isArray(f.portfolio)  ? f.portfolio.join(', ')  : (f.portfolio || '');
+    const name       = f.name || (Array.isArray(f.names) && f.names.length ? f.names.join(', ') : '');
+    const phone      = f.phone || (Array.isArray(f.phones) && f.phones.length ? f.phones.join(', ') : '');
 
     set('resDate',   dates);
     set('resAmount', amounts);
-    set('resEmail',  d.email || '');
-    set('resText',   d.raw_text || '');
+    set('resEmail',  d.email || f.email || '');
+    set('resText',   d.raw_text || f.raw_text || '');
+
+    set('resultName',      name);
+    set('resultPhone',     phone);
+    set('resultGithub',    github);
+    set('resultLinkedin',  linkedin);
+    set('resultPortfolio', portfolio);
 
     resultBox.classList.add('show');
 }
