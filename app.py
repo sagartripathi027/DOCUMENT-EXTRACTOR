@@ -4,26 +4,28 @@ from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 from processor import extract_text
 from parser import parse_structured_data, parse_requested_fields, get_supported_fields
+from backend.config import get_config
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # CONFIGURATION
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+Config = get_config()
+
+app.config['SECRET_KEY'] = Config.SECRET_KEY
+app.config['UPLOAD_FOLDER'] = Config.UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Ensure upload folder exists
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_EXTENSIONS
 
 
 def _parse_requested_fields_param():
@@ -151,4 +153,4 @@ def handle_extraction():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=Config.DEBUG)
