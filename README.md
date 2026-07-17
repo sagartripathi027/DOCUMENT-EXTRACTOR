@@ -1,104 +1,145 @@
-# AI Doc Extractor
+# 📄 Document Extractor AI 🚀
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Flask](https://img.shields.io/badge/Flask-3.0-black)
+![OCR](https://img.shields.io/badge/OCR-Tesseract-green)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![Deployment](https://img.shields.io/badge/Live-Render-success)
+
+## 🌐 Live Demo
+🚀 https://document-extractor-1-frq3.onrender.com
+
 ## 📌 Overview
-An intelligent, OCR-based document extraction system to extract structured text from images and PDFs. Built to process **100+ files** using Tesseract OCR combined with NLP preprocessing techniques, improving text extraction accuracy by **20%**.
----
-## 🚀 Features
-* Extract text from images and PDF documents
-* NLP preprocessing techniques to clean and normalize extracted text, boosting accuracy by **20%**
-* Image preprocessing (denoising, thresholding)
-* Flask backend for file upload and processing
-* RESTful Flask API with file upload handling, returning **structured JSON output** with extracted text and metadata
-* **Multi-format support** — PNG, JPEG, and PDF — reducing manual processing effort by **80%**
----
-## 🛠 Tech Stack
-* Python
-* Flask
-* Tesseract OCR
-* OpenCV
-* NLP preprocessing
----
-## ⚙️ Setup (Important)
-### Requirements
-* Python 3.8+
-### Install Tesseract OCR
-* **Windows:** Install and add to PATH
-* **Linux:**
-```bash
-sudo apt install tesseract-ocr
-```
-* **Mac:**
-```bash
-brew install tesseract
-```
----
-## 📊 Results
-* Processed **100+ files** using Tesseract OCR and NLP preprocessing techniques
-* Improved text extraction accuracy by **20%** through NLP preprocessing
-* Reduced manual processing effort by **80%** with multi-format (PNG, JPEG, PDF) support
-* Structured JSON output returned for every processed document, including extracted text and metadata
----
-## 📸 Demo
-### 🖼️ Input Document
-User uploads a document image.
-### 📤 Extracted Output
-The system processes the image and extracts structured text, returned as structured JSON with metadata.
-<p align="center">
-  <img src="image/demo.png" width="700">
-</p>
-This demonstrates the OCR pipeline converting raw document images into usable structured data.
 
----
+Document Extractor AI is an OCR-based document processing system that converts images and PDF documents into structured data.
 
-## ⚙️ How to Run
+The system uses Tesseract OCR, OpenCV, and intelligent field extraction techniques to extract useful information from unstructured documents and return clean JSON output.
+
+## ✨ Features
+
+✅ Image & PDF text extraction  
+✅ OCR powered document processing  
+✅ Name, Email, Phone, Date & Amount extraction  
+✅ GitHub, LinkedIn & Portfolio detection  
+✅ Custom field extraction support  
+✅ Image preprocessing for better accuracy  
+✅ Noise removal and deskewing  
+✅ REST API support  
+✅ Docker deployment ready  
+
+## 🛠️ Tech Stack
+
+**Backend:** Python, Flask, REST API  
+**OCR:** Tesseract OCR, OpenCV, Pillow  
+**PDF Processing:** PyMuPDF, pdf2image  
+**Extraction Engine:** Regex Patterns, Field Mapping, Validators  
+**Deployment:** Docker, Render  
+
+## ⚙️ How It Works
+
+```
+Upload Document
+       ↓
+Image/PDF Processing
+       ↓
+OCR Text Extraction
+       ↓
+Field Detection & Validation
+       ↓
+Structured JSON Response
+```
+
+## 📂 Project Structure
+
+```
+Document-Extractor
+│
+├── app.py
+├── processor.py
+├── parser.py
+│
+├── backend
+│   ├── extractor.py
+│   ├── field_mapper.py
+│   ├── validators.py
+│   ├── patterns.py
+│   └── config.py
+│
+├── templates
+├── static
+├── Dockerfile
+├── requirements.txt
+└── README.md
+```
+
+## 🚀 API Usage
+
+### Extract Document
+
+Endpoint:
+
+```
+POST /extract
+```
+
+Upload image or PDF file and receive structured JSON response.
+
+Example Response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "email": "example@gmail.com",
+    "phones": ["+91XXXXXXXXXX"],
+    "dates": ["2025"]
+  }
+}
+```
+
+## 💻 Run Locally
 
 ```bash
 git clone https://github.com/sagartripathi027/DOCUMENT-EXTRACTOR.git
+
 cd DOCUMENT-EXTRACTOR
+
 pip install -r requirements.txt
+
 python app.py
 ```
 
-Then open your browser and go to the local server address shown in the terminal (typically `http://localhost:5000`).
-
----
-
-## 📁 Project Structure
+Open:
 
 ```
-DOCUMENT-EXTRACTOR/
-├── app.py            # Flask app entry point & routes
-├── parser.py          # Structured data parsing logic
-├── processor.py        # OCR + NLP preprocessing pipeline
-├── utils.py           # Helper functions
-├── image/             # Demo & sample images
-├── templates/          # HTML templates
-├── static/            # CSS/JS static assets
-├── uploads/            # Temporary storage for uploaded files
-└── requirements.txt
+http://127.0.0.1:5000
 ```
 
----
+## 🐳 Docker Support
 
-## 🎯 Workflow
+```bash
+docker build -t document-extractor .
 
-| Step | Description |
-|------|-------------|
-| 1️⃣ Upload | User uploads an image or PDF (PNG, JPEG, or PDF — multi-format support) |
-| 2️⃣ Preprocess | Image preprocessing (denoising, thresholding) via OpenCV |
-| 3️⃣ Extract | Text extraction using Tesseract OCR |
-| 4️⃣ Refine | NLP preprocessing and structured data parsing |
-| 5️⃣ Deliver | Structured JSON output (extracted text + metadata) returned via the Flask REST API |
+docker run -p 5000:5000 document-extractor
+```
 
----
+## 🔮 Future Improvements
 
-## 📌 Future Improvements
+- AI/LLM based document understanding
+- Document classification
+- Cloud storage integration
+- Advanced AI extraction pipeline
 
-- [ ] Improve OCR accuracy with better preprocessing techniques
-- [ ] Add support for more document formats
-- [ ] Deploy as a full-fledged web app
+## 👨‍💻 Author
 
----
+**Sagar Tripathi**
 
-## 🙌 Acknowledgment
+GitHub:
+https://github.com/sagartripathi027
 
-Built as a practical project to demonstrate the integration of OCR, NLP, and Flask into a single end-to-end document extraction pipeline.
+LinkedIn:
+https://www.linkedin.com/in/sagartripathi027
+
+⭐ If you like this project, give it a star!
+
+Made with ❤️ using Python, Flask & OCR
