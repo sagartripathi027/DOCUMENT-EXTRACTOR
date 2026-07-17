@@ -6,6 +6,9 @@ import os
 import shutil
 from pdf2image import convert_from_path
 from PIL import Image
+from dotenv import load_dotenv
+
+load_dotenv()
 if os.name == "nt":
     _default_tess = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
     if os.path.exists(_default_tess):
@@ -14,10 +17,11 @@ else:
     _linux_tess = shutil.which("tesseract")
     if _linux_tess:
         pytesseract.pytesseract.tesseract_cmd = _linux_tess
-POPPLER_PATH = r'C:\poppler\poppler-26.02.0\Library\bin'
+POPPLER_PATH = os.getenv("POPPLER_PATH")
 def _get_poppler_path():
-    if os.name == "nt" and os.path.exists(POPPLER_PATH):
+    if POPPLER_PATH and os.path.exists(POPPLER_PATH):
         return POPPLER_PATH
+
     return None
 def _deskew(gray):
     try:
