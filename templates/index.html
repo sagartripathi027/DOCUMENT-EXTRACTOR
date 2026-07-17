@@ -98,6 +98,20 @@
                 <button type="button" class="file-remove" id="fileRemove" title="Remove">✕</button>
             </div>
 
+            <!-- Requested fields (optional) -->
+            <div class="fields-section">
+                <label class="fields-label" for="fields">
+                    Fields to extract <span class="fields-optional">(optional)</span>
+                </label>
+                <textarea
+                    id="fields"
+                    name="fields"
+                    class="fields-textarea"
+                    placeholder="Name&#10;Email&#10;Phone&#10;GST&#10;PAN&#10;&#10;or: Name, Email, Phone"
+                ></textarea>
+                <p class="fields-hint">Leave empty to extract everything.</p>
+            </div>
+
             <button type="submit" class="submit-btn" id="submitBtn">
                 <svg viewBox="0 0 24 24">
                     <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
@@ -128,56 +142,15 @@
         </form>
 
         <!-- Result box (outside form so it's never accidentally submitted) -->
+        <!-- Dynamic: result-body is populated entirely by JS based on whatever
+             fields the backend returns. No hardcoded field cards. -->
         <div class="result-box" id="resultBox">
             <div class="result-header">
                 <span>📊</span>
                 <span class="result-header-title">Extracted Data</span>
             </div>
-            <div class="result-body">
-                <div class="result-row">
-                    <span class="result-key">Name</span>
-                    <span class="result-val" id="resultName">Not Found</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Phone</span>
-                    <span class="result-val" id="resultPhone">Not Found</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Email</span>
-                    <span class="result-val" id="resEmail">—</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Date</span>
-                    <span class="result-val" id="resDate">—</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Amount</span>
-                    <span class="result-val" id="resAmount">—</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">GitHub</span>
-                    <span class="result-val" id="resultGithub">Not Found</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">LinkedIn</span>
-                    <span class="result-val" id="resultLinkedin">Not Found</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Portfolio</span>
-                    <span class="result-val" id="resultPortfolio">Not Found</span>
-                </div>
-                <div class="result-divider"></div>
-                <div class="result-row">
-                    <span class="result-key">Raw Text</span>
-                    <span class="result-val" id="resText">—</span>
-                </div>
+            <div class="result-body" id="resultBody">
+                <!-- dynamic result cards injected here by script.js -->
             </div>
         </div>
 

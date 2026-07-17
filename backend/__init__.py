@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-from app.config import Config
+from backend.config import Config
 
 
 def create_app():
@@ -17,9 +17,9 @@ def create_app():
 
     # Register Blueprints (groups of routes)
     # Each blueprint handles a specific part of the app
-    from app.routes.upload    import upload_bp
-    from app.routes.extract   import extract_bp
-    from app.routes.dashboard import dashboard_bp
+    from backend.routes.upload    import upload_bp
+    from backend.routes.extract   import extract_bp
+    from backend.routes.dashboard import dashboard_bp
 
     app.register_blueprint(upload_bp)
     app.register_blueprint(extract_bp)

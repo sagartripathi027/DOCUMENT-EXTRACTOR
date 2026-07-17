@@ -5,6 +5,7 @@ const fileName      = document.getElementById('fileName');
 const fileSize      = document.getElementById('fileSize');
 const fileTypeIcon  = document.getElementById('fileTypeIcon');
 const fileRemove    = document.getElementById('fileRemove');
+const fieldsInput   = document.getElementById('fields');
 const submitBtn     = document.getElementById('submitBtn');
 const btnLabel      = document.getElementById('btnLabel');
 const progressWrap  = document.getElementById('progressWrap');
@@ -12,6 +13,7 @@ const progressFill  = document.getElementById('progressFill');
 const progressText  = document.getElementById('progressText');
 const progressPct   = document.getElementById('progressPct');
 const resultBox     = document.getElementById('resultBox');
+const resultBody    = document.getElementById('resultBody');
 const errorBanner   = document.getElementById('errorBanner');
 const errorMsg      = document.getElementById('errorMsg');
 
@@ -69,40 +71,110 @@ function setProgress(pct, label) {
     progressPct.textContent  = pct + '%';
 }
 
-function set(id, value) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (value && String(value).trim() !== '') {
-        el.textContent = value;
-        el.classList.remove('none');
-    } else {
-        el.textContent = 'Not Found';
-        el.classList.add('none');
+// =========================================================================
+// Dynamic result rendering — NO hardcoded field cards.
+//
+// Backend may return either shape:
+//   { status: "success", data:   { ... } }   <- legacy / full extraction
+//   { status: "success", fields: { ... } }   <- possible future shape
+// We render whichever object is present, generically, so adding new
+// fields on the backend NEVER requires a frontend change.
+// =========================================================================
+
+function humanizeKey(key) {
+    return String(key)
+        .replace(/[_\-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function isEmptyValue(value) {
+    if (value === null || value === undefined) return true;
+    if (typeof value === 'string' && value.trim() === '') return true;
+    if (Array.isArray(value) && value.length === 0) return true;
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) return true;
+    return false;
+}
+
+function formatValue(value) {
+    if (isEmptyValue(value)) return null;
+
+    if (Array.isArray(value)) {
+        return value
+            .map(v => (typeof v === 'object' ? formatValue(v) : v))
+            .filter(v => v !== null && v !== undefined && v !== '')
+            .join(', ');
     }
+
+    if (typeof value === 'object') {
+        return Object.entries(value)
+            .map(([k, v]) => {
+                const formatted = Array.isArray(v) ? v.join(', ') : v;
+                return isEmptyValue(v) ? null : `${humanizeKey(k)}: ${formatted}`;
+            })
+            .filter(Boolean)
+            .join('; ');
+    }
+
+    return String(value);
+}
+
+function buildResultRow(key, value) {
+    const row = document.createElement('div');
+    row.className = 'result-row';
+
+    const keyEl = document.createElement('span');
+    keyEl.className = 'result-key';
+    keyEl.textContent = humanizeKey(key);
+
+    const valEl = document.createElement('span');
+    valEl.className = 'result-val';
+
+    const formatted = formatValue(value);
+    const lowerKey = String(key).toLowerCase();
+    const isLongText = lowerKey === 'raw_text' || lowerKey === 'rawtext' ||
+        (formatted && formatted.length > 150);
+
+    if (formatted === null) {
+        valEl.textContent = 'Not Found';
+        valEl.classList.add('none');
+    } else {
+        valEl.textContent = formatted;
+        if (isLongText) {
+            valEl.classList.add('long-text');
+            row.classList.add('full-width');
+        }
+    }
+
+    row.appendChild(keyEl);
+    row.appendChild(valEl);
+    return row;
 }
 
 function fillResult(data) {
-    const d = data.data || {};
-    const f = data.fields || {};
+    // Support BOTH response shapes: prefer data.fields if present
+    // (future universal endpoint), fall back to data.data (current
+    // /extract response), never assume either exists.
+    const result = data.fields || data.data || {};
 
-    const dates   = Array.isArray(d.dates)   ? d.dates.join(', ')   : (d.dates || '');
-    const amounts = Array.isArray(d.amounts) ? d.amounts.join(', ') : (d.amounts || '');
-    const github     = Array.isArray(f.github)     ? f.github.join(', ')     : (f.github || '');
-    const linkedin   = Array.isArray(f.linkedin)   ? f.linkedin.join(', ')   : (f.linkedin || '');
-    const portfolio  = Array.isArray(f.portfolio)  ? f.portfolio.join(', ')  : (f.portfolio || '');
-    const name       = f.name || (Array.isArray(f.names) && f.names.length ? f.names.join(', ') : '');
-    const phone      = f.phone || (Array.isArray(f.phones) && f.phones.length ? f.phones.join(', ') : '');
+    resultBody.innerHTML = '';
 
-    set('resDate',   dates);
-    set('resAmount', amounts);
-    set('resEmail',  d.email || f.email || '');
-    set('resText',   d.raw_text || f.raw_text || '');
+    const keys = Object.keys(result);
 
-    set('resultName',      name);
-    set('resultPhone',     phone);
-    set('resultGithub',    github);
-    set('resultLinkedin',  linkedin);
-    set('resultPortfolio', portfolio);
+    if (keys.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'result-row full-width';
+        const valEl = document.createElement('span');
+        valEl.className = 'result-val none';
+        valEl.textContent = 'No data extracted.';
+        empty.appendChild(valEl);
+        resultBody.appendChild(empty);
+    } else {
+        keys.forEach(key => {
+            resultBody.appendChild(buildResultRow(key, result[key]));
+        });
+    }
 
     resultBox.classList.add('show');
 }
@@ -161,6 +233,14 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     try {
         const formData = new FormData();
         formData.append('file', file);
+
+        // Send requested fields (comma or newline separated) if provided.
+        // Empty/whitespace-only input is intentionally NOT sent, so the
+        // backend falls back to legacy full extraction (parse_structured_data).
+        const fieldsValue = fieldsInput ? fieldsInput.value.trim() : '';
+        if (fieldsValue !== '') {
+            formData.append('fields', fieldsValue);
+        }
 
         const response = await fetch('/extract', {
             method: 'POST',
