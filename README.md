@@ -97,24 +97,19 @@ Example Response:
 }
 ```
 
-## 💻 Run Locally
+## 🚀 Deployment
 
-```bash
-git clone https://github.com/sagartripathi027/DOCUMENT-EXTRACTOR.git
+The application is deployed using Docker on Render.
 
-cd DOCUMENT-EXTRACTOR
+Live URL:
 
-pip install -r requirements.txt
+https://document-extractor-1-frq3.onrender.com
 
-python app.py
-```
+Deployment Stack:
 
-Open:
-
-```
-http://127.0.0.1:5000
-```
-
+- Docker Container
+- Gunicorn WSGI Server
+- Render Cloud Platform
 ## 🐳 Docker Support
 
 ```bash
