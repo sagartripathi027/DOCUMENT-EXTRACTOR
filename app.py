@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
@@ -118,8 +119,12 @@ def handle_extraction():
 
         logger.info(f"Processing file: {filename}")
 
-        # OCR (unchanged — processor.py is untouched)
+        start = time.time()
+        logger.info("OCR Started")
+
         raw_text = extract_text(filepath)
+
+        logger.info(f"OCR Finished in {time.time() - start:.2f} sec")
 
         if not raw_text.strip():
             return jsonify({"error": "No text detected"}), 422
@@ -127,14 +132,21 @@ def handle_extraction():
         # Determine whether the caller asked for specific fields.
         requested_fields = _parse_requested_fields_param()
         print("Requested Fields:", requested_fields)
+        
         if requested_fields:
-            # NEW universal path: extract only what was requested.
+            start = time.time()
+            logger.info("Parser Started")
+
             structured_output = parse_requested_fields(raw_text, requested_fields)
+
+            logger.info(f"Parser Finished in {time.time() - start:.2f} sec")
         else:
-            # LEGACY path: exact original behavior/response shape,
-            # preserved for backward compatibility.
+            start = time.time()
+            logger.info("Parser Started")
+
             structured_output = parse_structured_data(raw_text)
 
+            logger.info(f"Parser Finished in {time.time() - start:.2f} sec")
         # Cleanup
         os.remove(filepath)
 
