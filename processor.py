@@ -71,81 +71,39 @@ def _sharpen(gray):
 
     except Exception:
         return gray
+
 def preprocess_image(image_path):
     img = cv2.imread(image_path)
 
     if img is None:
         raise ValueError("Image not loaded properly.")
 
-    img = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-#  Noise removal
-    gray = cv2.fastNlMeansDenoising(gray, h=10)
-
-#  Deskew
-    gray = _deskew(gray)
-
-#  Contrast boost (IMPORTANT)
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
-    gray = clahe.apply(gray)
-
-#  Optional sharpening
-    gray = _sharpen(gray)
-
-#  Adaptive threshold (fix for light background)
-    processed = cv2.adaptiveThreshold(
-        gray, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        15, 4
-     )
-
-#  Invert (handles light text)
-    processed = cv2.bitwise_not(processed)
+    _, processed = cv2.threshold(
+        gray,
+        0,
+        255,
+        cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )
 
     return processed
 
 def preprocess_pil_image(pil_img):
     img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-    img = cv2.resize(img, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # 🔥 Auto invert
-    if np.mean(gray) < 127:
-        gray = cv2.bitwise_not(gray)
-
-#  Noise removal
-    gray = cv2.fastNlMeansDenoising(gray, h=10)
-
-#  Deskew
-    gray = _deskew(gray)
-
-# CLAHE
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
-    gray = clahe.apply(gray)
-
-#  Optional sharpening
-    gray = _sharpen(gray)
-
-# Blur
-    gray = cv2.medianBlur(gray, 3)
-
-# Threshold
-    processed = cv2.adaptiveThreshold(
-        gray, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        15, 4
+    _, processed = cv2.threshold(
+        gray,
+        0,
+        255,
+        cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )
 
-# Dilation
-    kernel = np.ones((1,1), np.uint8)
-    processed = cv2.dilate(processed, kernel, iterations=1)
-
     return processed
+
+
 def clean_text(text):
     """
     Clean OCR output
@@ -160,40 +118,46 @@ def extract_text(file_path):
     Full OCR pipeline — handles both images and PDFs
     """
 
-    config = r'--oem 3 --psm 6'
+    config = r'--oem 3 --psm 3'
 
-    if file_path.lower().endswith('.pdf'):
+    # PDF
+    if file_path.lower().endswith(".pdf"):
         try:
             poppler_path = _get_poppler_path()
 
             if poppler_path:
                 pages = convert_from_path(
                     file_path,
+                    dpi=120,
+                    first_page=1,
+                    last_page=1,
                     poppler_path=poppler_path
                 )
             else:
-                pages = convert_from_path(file_path)
+                pages = convert_from_path(
+                    file_path,
+                    dpi=120,
+                    first_page=1,
+                    last_page=1
+                )
 
-        except Exception:
-            return ''
+            all_text = ""
 
-        all_text = ''
-
-        for page in pages:
-            try:
+            for page in pages:
                 processed = preprocess_pil_image(page)
                 raw_text = pytesseract.image_to_string(
                     processed,
                     config=config
                 )
+                all_text += raw_text + " "
 
-                all_text += raw_text + ' '
+            return clean_text(all_text)
 
-            except Exception:
-                continue
+        except Exception as e:
+            print("PDF Error:", e)
+            return ""
 
-        return clean_text(all_text)
-
+    # Image
     else:
         try:
             processed = preprocess_image(file_path)
@@ -205,8 +169,9 @@ def extract_text(file_path):
 
             return clean_text(raw_text)
 
-        except Exception:
-            return ''
+        except Exception as e:
+            print("Image Error:", e)
+            return ""
 
 
 if __name__ == "__main__":
